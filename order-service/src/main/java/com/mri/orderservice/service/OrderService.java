@@ -22,7 +22,7 @@ public class OrderService {
 
     private final OrderRepo orderRepo;
     private final WebClient.Builder webClientBuilder;
-    public void createOrder(OrderRequest orderRequest) {
+    public String createOrder(OrderRequest orderRequest) {
 
         Order order = new Order();
         order.setOrderName(UUID.randomUUID().toString());
@@ -52,6 +52,7 @@ public class OrderService {
         }
         orderRepo.save(order);
 
+        return "Order has been placed successfully!";
     }
 
     private OrderLineItems mapToDto(OrderLineItemsDto orderLineItemsDto) {
