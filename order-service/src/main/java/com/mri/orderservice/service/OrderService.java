@@ -5,8 +5,10 @@ import com.mri.orderservice.dto.OrderLineItemsDto;
 import com.mri.orderservice.dto.OrderRequest;
 import com.mri.orderservice.entity.Order;
 import com.mri.orderservice.entity.OrderLineItems;
+import com.mri.orderservice.event.OrderPlacedEvent;
 import com.mri.orderservice.repo.OrderRepo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -22,6 +24,7 @@ public class OrderService {
 
     private final OrderRepo orderRepo;
     private final WebClient.Builder webClientBuilder;
+    private final KafkaTemplate<String, OrderPlacedEvent> kafkaTemplate;
     public String createOrder(OrderRequest orderRequest) {
 
         Order order = new Order();
@@ -51,6 +54,7 @@ public class OrderService {
             throw new IllegalArgumentException("Not in inventory");
         }
         orderRepo.save(order);
+        kafkaTemplate.send("notificationTopic", OrderPlacedEvent.builder().orderNumber(order.getOrderName()).build());
 
         return "Order has been placed successfully!";
     }
